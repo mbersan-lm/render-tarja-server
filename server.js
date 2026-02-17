@@ -5,7 +5,7 @@ const { chromium } = require("playwright");
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const APP_URL = process.env.APP_URL || "https://tarjassenhaforte123.lovable.app";
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://tarjassenhaforte123.lovable.app";
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
