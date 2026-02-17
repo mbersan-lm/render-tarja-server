@@ -119,30 +119,40 @@ app.post("/", async (req, res) => {
     });
     page = await context.newPage();
 
-    // Inject payload before any script runs
-    await page.addInitScript((data) => {
-      window.__EXPORT_PAYLOAD__ = data;
-    }, payload);
+// Inject payload before any script runs
+await page.addInitScript((data) => {
+  window.__EXPORT_PAYLOAD__ = data;
+}, payload);
 
-    // Navigate to the /export route
-    await page.goto(`${APP_URL}/export`, {
-      waitUntil: "domcontentloaded",
-      timeout: 20000,
-    });
+// Navigate to the /export route
+await page.goto(`${APP_URL}/export`, {
+  waitUntil: "domcontentloaded",
+  timeout: 20000,
+});
 
-    // Wait for the page to signal readiness
-    await page.waitForFunction(() => window.__EXPORT_READY__ === true, {
-      timeout: 20000,
-    });
+// Wait for the page to signal readiness
+await page.waitForFunction(() => window.__EXPORT_READY__ === true, {
+  timeout: 20000,
+});
 
-    // Extra safety: one more frame
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r()))
-    );
+// Force transparent background (avoid black body/background leaking into PNG)
+await page.addStyleTag({
+  content: `
+    html, body { background: transparent !important; }
+    #export-root { background: transparent !important; }
+  `,
+});
 
-    // Screenshot the export container
-    const element = page.locator("#export-root");
-    const pngBuffer = await element.screenshot({ type: "png" });
+// Extra safety: 2 frames (helps paint settle)
+await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r())));
+await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r())));
+
+// Screenshot the export container (PNG with alpha)
+const element = page.locator("#export-root");
+const pngBuffer = await element.screenshot({
+  type: "png",
+  omitBackground: true,
+});
 
     // Cache it
     cacheSet(key, pngBuffer);
