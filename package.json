@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npx playwright install chromium --with-deps"
+    "postinstall": "npx playwright install --with-deps chromium"
   },
   "dependencies": {
     "express": "^4.21.0",
